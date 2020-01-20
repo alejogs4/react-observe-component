@@ -1,6 +1,6 @@
 {
   "name": "react-observe-component",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Component which use intersection observer API to verify if its children are in the screen",
   "main": "dist/index.js",
   "scripts": {
@@ -18,6 +18,10 @@
     "observer",
     "component"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alejogs4/react-observe-component.git"
+  },
   "author": "Alejandro Garcia Serna <alejogs4@gmail.com>",
   "license": "MIT",
   "devDependencies": {
