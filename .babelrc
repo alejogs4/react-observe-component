@@ -1,0 +1,30 @@
+{
+	"ignore": [
+    "node_modules/**"
+  ],
+	"env": {
+		"test": {
+			"presets": [
+				"@babel/react",
+        "@babel/preset-env",
+				"@babel/preset-typescript"
+			]
+		},
+		"development": {
+			"presets": [
+				"@babel/react",
+        "@babel/preset-env",
+        "@babel/preset-typescript"
+			]
+		},
+		"production": {
+			"presets": [
+				"@babel/react",
+				"@babel/preset-env"
+			],
+			"plugins": [
+				"@babel/plugin-transform-react-jsx"
+			]
+		}
+	}
+}
