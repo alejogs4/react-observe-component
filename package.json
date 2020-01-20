@@ -1,6 +1,6 @@
 {
   "name": "react-observe-component",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Component which use intersection observer API to verify if its children are in the screen",
   "main": "dist/index.js",
   "scripts": {
