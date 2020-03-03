@@ -1,1 +1,111 @@
-"use strict";function _interopDefault(e){return e&&"object"==typeof e&&"default"in e?e.default:e}Object.defineProperty(exports,"__esModule",{value:!0});var React=_interopDefault(require("react")),__assign=function(){return(__assign=Object.assign||function(e){for(var n,t=1,r=arguments.length;t<r;t++)for(var o in n=arguments[t])Object.prototype.hasOwnProperty.call(n,o)&&(e[o]=n[o]);return e}).apply(this,arguments)};function __rest(e,n){var t={};for(var r in e)Object.prototype.hasOwnProperty.call(e,r)&&n.indexOf(r)<0&&(t[r]=e[r]);if(null!=e&&"function"==typeof Object.getOwnPropertySymbols){var o=0;for(r=Object.getOwnPropertySymbols(e);o<r.length;o++)n.indexOf(r[o])<0&&Object.prototype.propertyIsEnumerable.call(e,r[o])&&(t[r[o]]=e[r[o]])}return t}var Observe=function(e){var n=e.as,t=void 0===n?"div":n,r=e.children,o=e.isIntersecting,i=void 0===o?function(){}:o,s=e.isNotIntersecting,c=void 0===s?function(){}:s,u=e.onEndObserving,a=void 0===u?function(){}:u,f=e.options,v=e.triggersOnce,l=void 0!==v&&v,p=e.unobserve,O=void 0===p?function(){return!1}:p,b=__rest(e,["as","children","isIntersecting","isNotIntersecting","onEndObserving","options","triggersOnce","unobserve"]),d=React.useRef(null);function g(e,n){var t=e[0];t.isIntersecting?(i(t),l&&(a(t),n.disconnect())):c(t),O(t)&&(a(t),n.disconnect())}return React.useEffect(function(){var e=new IntersectionObserver(g,f);return d.current&&e.observe(d.current),function(){e.disconnect()}},[]),React.createElement(t,__assign({ref:d},b),r)};exports.Observe=Observe;
+import React from 'react';
+
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at http://www.apache.org/licenses/LICENSE-2.0
+
+THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+MERCHANTABLITY OR NON-INFRINGEMENT.
+
+See the Apache Version 2.0 License for specific language governing permissions
+and limitations under the License.
+***************************************************************************** */
+
+var __assign = function() {
+    __assign = Object.assign || function __assign(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+
+function __rest(s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+}
+
+function useObserve(useObserveOptions) {
+    var _a = useObserveOptions.isIntersecting, isIntersecting = _a === void 0 ? function () { } : _a, _b = useObserveOptions.isNotIntersecting, isNotIntersecting = _b === void 0 ? function () { } : _b, _c = useObserveOptions.onEndObserving, onEndObserving = _c === void 0 ? function () { } : _c, options = useObserveOptions.options, _d = useObserveOptions.triggersOnce, triggersOnce = _d === void 0 ? false : _d, _e = useObserveOptions.unobserve, unobserve = _e === void 0 ? function () { return false; } : _e;
+    /**
+     * Reference which will contain element to observe
+     */
+    var elementRef = React.useRef(null);
+    /**
+     * Callback to listen for changes in element intersection state
+     * @param entries
+     * @param observer
+     */
+    function onIntersectionObserverEvent(entries, observer) {
+        var entry = entries[0];
+        if (entry.isIntersecting) {
+            isIntersecting(entry);
+            // Give a truthy triggersOnce we disconnect observer after first isIntersecting call
+            if (triggersOnce) {
+                onEndObserving(entry);
+                observer.disconnect();
+            }
+        }
+        else {
+            isNotIntersecting(entry);
+        }
+        // If unobserve function returns true we disconnect observer
+        if (unobserve(entry)) {
+            onEndObserving(entry);
+            observer.disconnect();
+        }
+    }
+    React.useEffect(function () {
+        var observer = new IntersectionObserver(onIntersectionObserverEvent, options);
+        if (elementRef.current) {
+            observer.observe(elementRef.current);
+        }
+        /**
+         * Disconnect observer as soon as component unmount
+         */
+        return function () {
+            observer.disconnect();
+        };
+    }, [elementRef.current]);
+    return { elementRef: elementRef };
+}
+//# sourceMappingURL=useObserve.js.map
+
+function cleanObserveProps(observeProps) {
+    var propsClone = __assign({}, observeProps);
+    delete propsClone.isIntersecting;
+    delete propsClone.isNotIntersecting;
+    delete propsClone.options;
+    delete propsClone.triggersOnce;
+    delete propsClone.unobserve;
+    delete propsClone.onEndObserving;
+    delete propsClone.as;
+    return propsClone;
+}
+/**
+ * Component which will abstract intersection observer behaviour
+ * @param props
+ */
+var Observe = function (props) {
+    var _a = props.as, Component = _a === void 0 ? "div" : _a, children = props.children, restProps = __rest(props, ["as", "children"]);
+    var cleanedObserverProps = cleanObserveProps(restProps);
+    var elementRef = useObserve(props).elementRef;
+    return (React.createElement(Component, __assign({ ref: elementRef }, cleanedObserverProps), children));
+};
+//# sourceMappingURL=Observe.js.map
+
+export { Observe, useObserve };
+//# sourceMappingURL=index.js.map

@@ -76,3 +76,48 @@ function YourComponent() {
 ```
 
 > This component receives every valid props which HTML tag defined in as prop can receive, An example of this is className prop in the above example
+
+## useObserve hook
+You could use useObserve hook to observe your element without create a new html tag, this hook receives as an object
+the same options than Observe component
+
+### Usage
+```javascript
+import React from "react"
+import { useObserve } from "react-observe-component"
+
+export const YourComponent = () => {
+  const [inView, setIsInView] = React.useState(false)
+
+  const { elementRef } = useObserve({
+    isIntersecting: () => setIsInView(true),
+    isNotIntersecting: () => setIsInView(false),
+    options: {
+      threshold: 0.5
+    }
+  })
+
+  return (
+    <>
+      <Card>
+        1
+      </Card>
+      <Card>
+        2
+      </Card>
+      <Card>
+        3
+      </Card>
+        <Card blue>
+          4
+        </Card>
+        <Card blue>
+          5
+        </Card>
+      <Card ref={elementRef}>
+        {inView ? 'Visible' : 'No visible'}
+      </Card>
+    </>
+  )
+}
+```

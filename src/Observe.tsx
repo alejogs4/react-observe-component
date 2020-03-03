@@ -1,17 +1,19 @@
-import React, { ElementType } from "react";
+import React from "react";
+import { IProps } from "./types";
+import { useObserve } from "./useObserve";
 
-// Observe component props
-interface IProps {
-  options?: IntersectionObserverInit; // Intersection observer options
-  triggersOnce?: boolean; // Boolean props which would say if observer must unsubcribe after first isIntersecting event
-  as?: ElementType; // Element type which will surround to children props
-  // Function that It will be executed every time element is intersecting root element
-  isIntersecting?(entry: IntersectionObserverEntry): void;
-  // Function that It will be executed every time element is not longer intersecting root element
-  isNotIntersecting?(entry: IntersectionObserverEntry): void;
-  // Boolean function which it will say if target element will not observe the target element anymore
-  unobserve?(entry: IntersectionObserverEntry): boolean;
-  onEndObserving?(entry: IntersectionObserverEntry): void;
+function cleanObserveProps(observeProps: IProps): object {
+  const propsClone: IProps = { ...observeProps };
+
+  delete propsClone.isIntersecting;
+  delete propsClone.isNotIntersecting;
+  delete propsClone.options;
+  delete propsClone.triggersOnce;
+  delete propsClone.unobserve;
+  delete propsClone.onEndObserving;
+  delete propsClone.as;
+
+  return propsClone;
 }
 
 /**
@@ -19,62 +21,16 @@ interface IProps {
  * @param props
  */
 const Observe: React.FC<IProps> = (props) => {
-  const {
-    as: Component = "div",
-    children,
-    isIntersecting = () => {},
-    isNotIntersecting = () => {},
-    onEndObserving = () => {},
-    options,
-    triggersOnce = false,
-    unobserve = () => false,
-    ...restProps
-  } = props;
-  /**
-   * Reference which will contain element to observe
-   */
-  const elementRef = React.useRef<HTMLDivElement>(null);
+  const { as: Component = "div", children, ...restProps } = props;
 
-  /**
-   * Callback to listen for changes in element intersection state
-   * @param entries
-   * @param observer
-   */
-  function onIntersectionObserverEvent(entries: IntersectionObserverEntry[], observer: IntersectionObserver) {
-    const [entry] = entries;
+  const cleanedObserverProps = cleanObserveProps(restProps);
+  const { elementRef } = useObserve(props);
 
-    if (entry.isIntersecting) {
-      isIntersecting(entry);
-      // Give a truthy triggersOnce we disconnect observer after first isIntersecting call
-      if (triggersOnce) {
-        onEndObserving(entry);
-        observer.disconnect();
-      }
-    } else {
-      isNotIntersecting(entry);
-    }
-    // If unobserve function returns true we disconnect observer
-    if (unobserve(entry)) {
-      onEndObserving(entry);
-      observer.disconnect();
-    }
-  }
-
-  React.useEffect(() => {
-    const observer: IntersectionObserver = new IntersectionObserver(onIntersectionObserverEvent, options);
-
-    if (elementRef.current) {
-      observer.observe(elementRef.current);
-    }
-    /**
-     * Disconnect observer as soon as component unmount
-     */
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
-  return <Component ref={elementRef} {...restProps}>{children}</Component>;
+  return (
+    <Component ref={elementRef} {...cleanedObserverProps}>
+      {children}
+    </Component>
+  );
 };
 
 export { Observe };

@@ -1,6 +1,6 @@
 import React from 'react';
-import { action } from '@storybook/addon-actions';
-import { Observe } from "../src"
+// import { action } from '@storybook/addon-actions';
+import { Observe, useObserve } from "../src"
 import { Card } from './Components/Card'
 
 export default {
@@ -35,7 +35,7 @@ export const notifyWhenAppears = () => {
         6
       </Card>
       <Observe
-        options={{ threshold: 0 }}
+        options={{ threshold: 0.5 }}
         isIntersecting={onIsIntersecting}
         triggersOnce
       >
@@ -100,10 +100,49 @@ export const notifyRatio = () => {
   )
 }
 
+export const notifyWithUseObserve = () => {
+  const [inView, setIsInView] = React.useState(false)
+
+  const { elementRef } = useObserve({
+    isIntersecting: () => console.log('oa') || setIsInView(true),
+    isNotIntersecting: () => setIsInView(false),
+    options: {
+      threshold: 0.5
+    }
+  })
+
+  return (
+    <>
+      <Card>
+        1
+      </Card>
+      <Card>
+        2
+      </Card>
+      <Card>
+        3
+      </Card>
+        <Card blue>
+          4
+        </Card>
+        <Card blue>
+          5
+        </Card>
+      <Card ref={elementRef}>
+        {inView ? 'Visible' : 'No visible'}
+      </Card>
+    </>
+  )
+}
+
 notifyWhenAppears.story = {
   name: 'Notify when appears',
 };
 
 notifyRatio.story = {
   name: 'Notify every time given element has passed for ratio',
+};
+
+notifyWithUseObserve.story = {
+  name: 'Notify using use observe'
 };
